@@ -18,22 +18,56 @@
 
 package local.example.wildflower;
 
-import android.content.Context;
-
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
-
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertEquals;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
+import androidx.test.rule.ActivityTestRule;
 
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.clearText;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static androidx.test.espresso.action.ViewActions.typeText;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static local.example.wildflower.R.id.main_edit_text;
+
+@LargeTest
 @RunWith(AndroidJUnit4.class)
 public class TypedInstrumentedTests {
 
+    /* remember to switch on the screen on testing device */
+
+    private String toBeTyped;
+
+    @Rule
+    public ActivityTestRule<MainActivity>
+            mainActivityTestRule = new ActivityTestRule<>(MainActivity.class);
+
+    @Before
+    public void setUp() {
+        toBeTyped = "Welcome to Eden.";
+        mainActivityTestRule.getActivity().getSupportFragmentManager().beginTransaction();
+    }
+
     @Test
-    public void useAppContext() {
-        Context appContext = InstrumentationRegistry.getTargetContext();
-        assertEquals("local.example.sunflower", appContext.getPackageName());
+    public void clearedAndTypedTest() {
+        onView(withId(main_edit_text)).check(matches(isDisplayed()));
+        onView(withId(main_edit_text)).perform(clearText(),
+                typeText("Welcome."), closeSoftKeyboard());
+    }
+
+    @Test
+    public void anotherTypedTest() {
+        onView(withId(main_edit_text)).perform(clearText(), typeText(toBeTyped),
+                closeSoftKeyboard());
+        onView(withId(main_edit_text)).perform(click());
+        onView(withId(main_edit_text)).check(matches(withText(toBeTyped)));
     }
 }
